@@ -1,0 +1,135 @@
+<template>
+    <view class="content">
+
+        <view class="web-view">
+            <web-view class="web-view" :src="url" ref="webview" @onPostMessage="onPostMessage"></web-view>
+            <button class="button" @click="evalJs">evalJs(改变webview背景颜色)</button>
+        </view>
+    </view>
+</template>
+
+<script>
+    export default {
+
+        data() {
+            return {
+                url: '',
+                pageTitle: ''
+            }
+        },
+        onLoad(options) {
+            console.log('test')
+            this.url = '/hybrid/html/face.html'
+            // #ifdef APP-PLUS
+            plus.navigator.setFullscreen(false) //是否需要状态栏
+            plus.camera.getCamera(); //二次获取摄像头，h5需要
+            // #endif
+            setTimeout(() =>{
+                this.evalJs()
+            },500)
+            
+        },
+        mounted() {},
+        onBackPress(event) {
+
+        },
+        methods: {
+            // 调用 webview 内部逻辑
+            			evalJs: function() {
+                            console.log(this.$refs.webview.evalJs)
+            				this.$refs.webview.evalJs("initVideo()");
+            			},
+            onPostMessage(e) {
+                let method = e.detail.data[0].method
+                let value = e.detail.data[0].value
+                switch (method) {
+                    case 'getTitle':
+                        this.pageTitle = value
+                        uni.setNavigationBarTitle({
+                            title: value
+                        })
+                        break;
+                    case 'test':
+
+                        break;
+                    case 'back':
+                        uni.switchTab({
+                            url: '/pages/home/index'
+                        })
+                        break;
+                    case 'copy':
+                        uni.setClipboardData({
+                            data: value,
+                            showToast: false,
+                            success: function() {
+                                uni.showToast({
+                                    title: 'copy',
+                                    duration: 2000
+                                });
+                            }
+                        })
+                        break;
+                    case 'whatsapp':
+                        plus.runtime.launchApplication({
+                            pname: `com.whatsapp`,
+                            extra: {
+
+                            }
+                        }, function(e) {
+                            uni.showToast({
+                                title: 'WhatsApp no instalado',
+                                duration: 1500,
+                                icon: 'none'
+                            })
+                        });
+                        break;
+                    case 'facebook':
+                        plus.runtime.launchApplication({
+                            pname: `com.facebook`,
+                            extra: {
+
+                            }
+                        }, function(e) {
+                            uni.showToast({
+                                title: 'facebook no instalado',
+                                duration: 1500,
+                                icon: 'none'
+                            })
+                        });
+                        break;
+                    case 'share':
+                        uni.shareWithSystem({
+                            summary: '',
+                            href: value,
+                            success() {
+                                // 分享完成，请注意此时不一定是成功分享
+                            },
+                            fail() {
+                                // 分享失败
+                            }
+                        })
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+</script>
+
+<style scoped lang="scss">
+    .content {
+        width: 750rpx;
+        flex: 1;
+        background-color: #f7f7f7f7;
+        display: flex;
+        align-items: center;
+        height: 100vh;
+
+        .web-view {
+            height: 100%;
+            width: 750rpx;
+            flex: 1;
+        }
+    }
+</style>
