@@ -17,7 +17,7 @@ export const request = (options) => {
             },
             success: (res) => {
                 console.log(options.data)
-                 resolve(res)
+                 resolve(res.data)
             },
             // 
             fail: (err) => {

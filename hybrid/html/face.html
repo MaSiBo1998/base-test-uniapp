@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<title>人脸采集</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<!-- 	<link rel="stylesheet" type="text/css" href="./css/index.css" /> -->
-    <script type="text/javascript" src="./js/uni.webview.1.5.2.js"></script>
-		<script src="./js/jq.js" type="text/javascript" charset="utf-8"></script>
-		<!-- uni 的 SDK -->
-		<script type="text/javascript" src="https://js.cdn.aliyun.dcloud.net.cn/dev/uni-app/uni.webview.1.5.2.js"></script>
-		<script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.0.0/vconsole.min.js" type="text/javascript"charset="utf-8"></script>
-		<script>
-			// init vConsole，app中查看
-			var vConsole = new VConsole();
-			console.log('Hello world');
-		</script>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="./js/uni.webview.1.5.2.js"></script>
+        <script src="./js/jq.js" type="text/javascript" charset="utf-8"></script>
+        <!-- uni 的 SDK -->
+        <script type="text/javascript" src="https://js.cdn.aliyun.dcloud.net.cn/dev/uni-app/uni.webview.1.5.2.js">
+        </script>
+        <script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.0.0/vconsole.min.js" type="text/javascript"
+            charset="utf-8"></script>
+        <script>
+            // init vConsole，app中查看
+            var vConsole = new VConsole();
+            console.log('Hello world');
+        </script>
         <script>
             document.addEventListener('UniAppJSBridgeReady', function() {
                 uni.webView.getEnv(function(res) {
@@ -22,197 +22,83 @@
                 });
             });
         </script>
-		<style>
-			.mui-content {
-				margin: 0 auto;
-				text-align: center;
-				border: 0px solid red;
-			}
-			/*摄像头翻转180度*/
-			video{
-				transform: rotateY(180deg);
-				-webkit-transform: rotateY(180deg);    /* Safari 和 Chrome */
-				-moz-transform: rotateY(180deg);
-			}
-		</style>
-	</head>
-	<body class='body'>
-		<div class="mui-content">
-<!-- 			<video id="webcam" loop preload> </video> -->
-			<div style="margin-top: 20px; font-size: 20px;">
-				拍摄您本人人脸，请确保正对手机，光线充足
-			</div>
-			<div style="font-size: 16px; margin: 5px 0px 50px 0px;">
-				<span id="userName">测试</span>，<span id="idcardno">试一下</span>
-			</div>
-			<div style="margin: 0 auto;">
-				<video id="video" style="margin: 0 auto; border-radius: 150px; width: 200px;height: 200px;"></video>
-				<canvas id='canvas' width="300" height="300" style="border: 0px solid red;margin: auto; display: none;"></canvas>
-			</div>
-			<hr style="width: 400px; margin-top: 50px; margin-bottom: 50px;"/>
-			<div style="width: 300px; height: 100px; margin: 0 auto;">
-				<div style="float: left;">
-					<div style="width: 100px;margin-top: 10px; font-size: 16px;">正对手机</div>
-				</div>
-				<div style="float: left;">
-					<div style="width: 100px;margin-top: 10px; font-size: 16px;">光线充足</div>
-				</div>
-				<div style="float: left;">
-					<div style="width: 100px;margin-top: 10px; font-size: 16px;">脸无遮挡</div>
-				</div>
-			</div>
-			<div style="width: 80%; position: absolute; bottom: 20px; left: 50%; transform: translate(-50%, -50%); background-color: #BBDEFB;">
-				<button id="start" style="width: 100%; height: 80px; background-color: #008AFF; font-size: 30px; color: #FFFFFF;">采集本人人脸</button>
-			</div>
-			
-		</div>
-	</body>
-	<script type="text/javascript">
-		var video, canvas, vendorUrl, interval, videoHeight, videoWidth, time = 0;
-		// 获取webview页面数据
-		// var data = JSON.parse(getUrlParam('data'))
-		// var info = data.info;
-		// var userInfo = data.userInfo;
-		// const userId = data.userId;	// 当前登录用户id
-		// $("#userName").text(userInfo.realName);
-		// $("#idcardno").text(userInfo.idcardNo);
-		$(function(){
-			// 初始化
-			initVideo()
-			// uni.app事件
-			document.addEventListener('UniAppJSBridgeReady', function() {
-			});
-		})
-		// 获取url携带的数据
-		function getUrlParam(name) {
-			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-			var r = window.location.search.substr(1).match(reg);
-			if (r != null) return unescape(r[2]);
-			return null;
-		}
-		// 摄像头初始化
-		function initVideo() {
-			video = document.getElementById("video");
-			videoHeight = 300
-			videoWidth = 300
-			setTimeout(() => {
-				if (
-					navigator.mediaDevices.getUserMedia ||
-					navigator.getUserMedia ||
-					navigator.webkitGetUserMedia ||
-					navigator.mozGetUserMedia
-				) {
-					//调用用户媒体设备, 访问摄像头
-					getUserMedia({
-							video: {
-								width: {
-									ideal: videoWidth,
-									max: videoWidth
-								},
-								height: {
-									ideal: videoHeight,
-									max: videoHeight
-								},
-								facingMode: 'user', //前置摄像头
-								 //facingMode: { exact: "environment" }, //后置摄像头
-								frameRate: {
-									ideal: 30,
-									min: 10
-								}
-							}
-						},
-						videoSuccess,
-						videoError
-					);
-				} else {}
-			}, 300);
-		}
-		// 获取用户设备
-		function getUserMedia(constraints, success, error) {
-			if (navigator.mediaDevices.getUserMedia) {
-				//最新的标准API
-				navigator.mediaDevices
-					.getUserMedia(constraints)
-					.then(success)
-					.catch(error);
-			} else if (navigator.webkitGetUserMedia) {
-				//webkit核心浏览器
-				navigator.webkitGetUserMedia(constraints, success, error);
-			} else if (navigator.mozGetUserMedia) {
-				//firfox浏览器
-				navigator.mozGetUserMedia(constraints, success, error);
-			} else if (navigator.getUserMedia) {
-				//旧版API
-				navigator.getUserMedia(constraints, success, error);
-			}
-		}
-		// 开始有画面
-		function videoSuccess(stream) {
-            video = document.getElementById("video");
-			this.mediaStreamTrack = stream;
-			console.log("=====stream")
-            console.log(stream)
-			video.srcObject = stream;
-			video.play();
+    </head>
+    <body class='body'>
+
+    </body>
+    <script type="text/javascript">
+        var video, canvas, vendorUrl, interval, videoHeight, videoWidth, time = 0;
+        // 获取webview页面数据
+        // var data = JSON.parse(getUrlParam('data'))
+        // var info = data.info;
+        // var userInfo = data.userInfo;
+        // const userId = data.userId;	// 当前登录用户id
+        // $("#userName").text(userInfo.realName);
+        // $("#idcardno").text(userInfo.idcardNo);
+        $(function() {
+            // 初始化
             // initVideo()
-			// 这里处理我的的东西
-		}
-		function videoError(error) {
-			console.log('摄像头获取错误')
-			alert('摄像头获取错误')
-		}
-		// 单次拍照
-		function getFaceImgBase64() {
-			canvas = document.getElementById('canvas');
-			//绘制canvas图形
-			canvas.getContext('2d').drawImage(video, 0, 0, 300, 300);
-			//把canvas图像转为img图片
-			var bdata = canvas.toDataURL("image/jpeg");
-			//img.src = canvas.toDataURL("image/png");
-			return bdata.split(',')[1]; //照片压缩成base位数据
-		}
-		$('#start').on('click', function() {
-            initVideo()
-			// time= 0;
-			// console.log("开始人脸采集，请正对屏幕");
-			// faceGather();
-		})
-		// 人脸采集
-		function faceGather() {
-			const faceImgBase64 = getFaceImgBase64();
-			console.log(faceImgBase64);
-			var formData = new FormData();
-			$.ajax({
-				type: 'POST',
-				url: "http://pt8w5ehyc9m1.ngrok2.xiaomiqiu.cn/erp/face/quality",
-				data: formData,
-				contentType: false,
-				processData: false,
-				dataType: "json",
-				mimeType: "application/x-www-form-urlencoded'",
-				success: function(res) {
-					console.log("====调用采集接口返回====");
-					console.log(res);
-					console.log("====调用采集接口返回====");
-					if (res.result === 'true') {
-						alert("人脸采集成功");
-						// 跳转到首页
-						uni.reLaunch({
-							url: '/pages/dashboard/dashboard'  
-						});
-					} else {
-						time++;
-						if(time > 5) {
-							alert("人脸采集失败");
-						}else{
-							//faceGather();
-						}
-					}
-				},
-				error: function(data) {
-					console.log("链接服务异常。")
-				}
-			});
-		}
-	</script>
+            // uni.app事件
+            document.addEventListener('UniAppJSBridgeReady', function() {});
+            uni.webView.postMessage({
+                data: {
+                    method: 'getTitle',
+                    value: 'test'
+                }
+            });
+        })
+
+        function dataURLtoBlob(dataurl) {
+            var arr = dataurl.split(','),
+                mime = arr[0].match(/:(.*?);/)[1],
+                bstr = atob(arr[1]),
+                n = bstr.length,
+                u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], {
+                type: mime
+            });
+        }
+        function dataURLtoFile(dataurl, filename) { 
+            var arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new File([u8arr], filename, { type: mime });
+        }
+        //将blob转换为file
+        function blobToFile(theBlob, fileName) {
+            theBlob.lastModifiedDate = new Date();
+            theBlob.name = fileName;
+            return theBlob;
+        }
+
+        // 获取url携带的数据
+        function getFile(base64) {
+            // uni.webView.postMessage({
+            //     data: {
+            //         method: 'getTitle',
+            //         value: base64
+            //     }
+            // });
+            // //调用
+            var blob = dataURLtoBlob(base64);
+            var file = blobToFile(blob, 'test');
+            var file1 = dataURLtoFile(base64, 'test');
+            console.log(file1)
+            uni.webView.postMessage({
+                data: {
+                    method: 'getTitle',
+                    value: file
+                }
+            });
+            console.log(file)
+        }
+    </script>
 </html>
