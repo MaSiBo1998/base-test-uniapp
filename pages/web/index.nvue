@@ -3,7 +3,7 @@
 
         <view class="web-view">
             <web-view class="web-view" :src="url" ref="webview" @onPostMessage="onPostMessage"></web-view>
-            <button class="button" @click="evalJs">evalJs(改变webview背景颜色)</button>
+
         </view>
     </view>
 </template>
@@ -13,101 +13,65 @@
 
         data() {
             return {
-                url: '',
+                url: '/hybrid/html/face.html',
                 pageTitle: ''
             }
         },
         onLoad(options) {
-            console.log('test')
-            this.url = '/hybrid/html/face.html'
+            this.url = 'https://bjdc-webview.xmtest.net/#/?test=sendnative'
             // #ifdef APP-PLUS
-            plus.navigator.setFullscreen(false) //是否需要状态栏
-            plus.camera.getCamera(); //二次获取摄像头，h5需要
+            // plus.navigator.setFullscreen(false) //是否需要状态栏
+            // plus.camera.getCamera(); //二次获取摄像头，h5需要
             // #endif
-            setTimeout(() =>{
-                this.evalJs()
-            },500)
-            
         },
         mounted() {},
         onBackPress(event) {
 
         },
         methods: {
+            // 在 uni-app 的页面中
+            getSMSListFromModule(callback) {
+                wtModule.getSMSList((ret) => {
+                    callback(ret);
+                });
+            },
+            // 获取当前位置信息
+            async getCurrentLocation() {
+                const res = await getLocation()
+                console.log('获取当前位置信息----', res)
+                if (res && !res.errMsg) {
+                    const {
+                        longitude,
+                        latitude,
+                        address
+                    } = res
+                    let locationInfo = {
+                        longitude,
+                        latitude,
+                        location: address.poiName
+                    }
+                    // 将结果返回给H5页面，evalJS触发H5中绑定在window上的方法getLocationByApp，达到传参的目的
+                    this.$refs.webview.evalJs(`getLocationByApp('${JSON.stringify(locationInfo)}')`)
+                } else {
+                    // 将结果返回给H5页面
+                    this.$refs.webview.evalJs(`getLocationByApp('${JSON.stringify(false)}')`)
+                }
+            },
             // 调用 webview 内部逻辑
-            			evalJs: function() {
-                            console.log(this.$refs.webview.evalJs)
-            				this.$refs.webview.evalJs("initVideo()");
-            			},
+            evalJs: function() {
+                const currentWebview = this.$scope.$getAppWebview().children()[0];
+                currentWebview.evalJS(`${_funName}(${JSON.stringify(_data)})`);
+
+                // this.$refs.webview.evalJs(`localStorage.setItem('key', '123');`);
+            },
             onPostMessage(e) {
+                let _this = this
                 let method = e.detail.data[0].method
                 let value = e.detail.data[0].value
                 switch (method) {
-                    case 'getTitle':
-                        this.pageTitle = value
-                        uni.setNavigationBarTitle({
-                            title: value
-                        })
-                        break;
-                    case 'test':
-
-                        break;
-                    case 'back':
-                        uni.switchTab({
-                            url: '/pages/home/index'
-                        })
-                        break;
-                    case 'copy':
-                        uni.setClipboardData({
-                            data: value,
-                            showToast: false,
-                            success: function() {
-                                uni.showToast({
-                                    title: 'copy',
-                                    duration: 2000
-                                });
-                            }
-                        })
-                        break;
-                    case 'whatsapp':
-                        plus.runtime.launchApplication({
-                            pname: `com.whatsapp`,
-                            extra: {
-
-                            }
-                        }, function(e) {
-                            uni.showToast({
-                                title: 'WhatsApp no instalado',
-                                duration: 1500,
-                                icon: 'none'
-                            })
-                        });
-                        break;
-                    case 'facebook':
-                        plus.runtime.launchApplication({
-                            pname: `com.facebook`,
-                            extra: {
-
-                            }
-                        }, function(e) {
-                            uni.showToast({
-                                title: 'facebook no instalado',
-                                duration: 1500,
-                                icon: 'none'
-                            })
-                        });
-                        break;
-                    case 'share':
-                        uni.shareWithSystem({
-                            summary: '',
-                            href: value,
-                            success() {
-                                // 分享完成，请注意此时不一定是成功分享
-                            },
-                            fail() {
-                                // 分享失败
-                            }
-                        })
+                    case 'getLocation':
+                    console.log('开始调用')
+                        this.$refs.webview.evalJs(`window?.postMsg("getLocation", "123");`)
                         break;
                     default:
                         break;

@@ -41,7 +41,7 @@ export const login = (data) => request({
     url: '/MLOVMyOLxSWb/ddfzGV/IzISHNlrcM/pVxouuRVD',
     method: 'POST',
     data: {
-        contactMobile: '1111222222',
+        contactMobile: '1111222223',
         captchaCode: '1234',
         deviceOS: 'P1001',
         i18n: 'zh_CN',

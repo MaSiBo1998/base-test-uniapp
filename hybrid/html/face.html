@@ -27,78 +27,20 @@
 
     </body>
     <script type="text/javascript">
-        var video, canvas, vendorUrl, interval, videoHeight, videoWidth, time = 0;
-        // 获取webview页面数据
-        // var data = JSON.parse(getUrlParam('data'))
-        // var info = data.info;
-        // var userInfo = data.userInfo;
-        // const userId = data.userId;	// 当前登录用户id
-        // $("#userName").text(userInfo.realName);
-        // $("#idcardno").text(userInfo.idcardNo);
         $(function() {
             // 初始化
-            // initVideo()
-            // uni.app事件
-            document.addEventListener('UniAppJSBridgeReady', function() {});
-            uni.webView.postMessage({
-                data: {
-                    method: 'getTitle',
-                    value: 'test'
-                }
-            });
+           uni.webView.postMessage({
+               data: {
+                   method: 'getLocation',
+                   value: title
+               }
+           });
         })
+        function getLocation(val){
+            // val  接收位置信息
+            console.log(val)
+        }
+    
 
-        function dataURLtoBlob(dataurl) {
-            var arr = dataurl.split(','),
-                mime = arr[0].match(/:(.*?);/)[1],
-                bstr = atob(arr[1]),
-                n = bstr.length,
-                u8arr = new Uint8Array(n);
-            while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
-            }
-            return new Blob([u8arr], {
-                type: mime
-            });
-        }
-        function dataURLtoFile(dataurl, filename) { 
-            var arr = dataurl.split(','),
-            mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]),
-            n = bstr.length,
-            u8arr = new Uint8Array(n);
-            while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
-            }
-            return new File([u8arr], filename, { type: mime });
-        }
-        //将blob转换为file
-        function blobToFile(theBlob, fileName) {
-            theBlob.lastModifiedDate = new Date();
-            theBlob.name = fileName;
-            return theBlob;
-        }
-
-        // 获取url携带的数据
-        function getFile(base64) {
-            // uni.webView.postMessage({
-            //     data: {
-            //         method: 'getTitle',
-            //         value: base64
-            //     }
-            // });
-            // //调用
-            var blob = dataURLtoBlob(base64);
-            var file = blobToFile(blob, 'test');
-            var file1 = dataURLtoFile(base64, 'test');
-            console.log(file1)
-            uni.webView.postMessage({
-                data: {
-                    method: 'getTitle',
-                    value: file
-                }
-            });
-            console.log(file)
-        }
     </script>
 </html>

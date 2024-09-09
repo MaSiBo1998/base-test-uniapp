@@ -1,7 +1,6 @@
   <template>
       <view>
           <view class="container">
-              <web-view class="web-view" :src="weburl" ref="webview" @onPostMessage="onPostMessage"></web-view>
               <button @click="test()">test</button>
               <button @click="login()">login</button>
               <button type="primary" @click="getInstall">获取安装列表数据</button>
@@ -13,7 +12,7 @@
               <button type="primary" @click="getGoCameraVideo">视频录制</button>
               <button type="primary" @click="openAlbum(false)">单选图片</button>
               <button type="primary" @click="openAlbum(true)">多选图片</button>
-              <button type="primary" @click="initAf">初始化AF</button>
+              <button type="primary" @click="initAf()">初始化AF</button>
           </view>
       </view>
   </template>
@@ -36,7 +35,10 @@
           test,
           beforeLive
       } from '@/api/data.js'
+      //  #ifdef APP-PLUS
       const wtModule = uni.requireNativePlugin('WTUniPlugin-WTModule');
+      // #endif
+
       export default {
           data() {
               return {
@@ -48,53 +50,68 @@
                   weburl: '/hybrid/html/face.html'
               }
           },
-          onLoad() {
-          },
-          onShow() {
-              // const base64String = "data:text/plain;base64,MTIzNDU=";
-              // const fileName = "example.txt";
-              // const mimeType = "text/plain";
-              // const file = this.base64ToFile(base64String, fileName, mimeType);
-              // console.log(file);
-
-          },
+          onLoad() {},
+          onShow() {},
           methods: {
-              test(base64) {
-                  console.log(123)
-                  this.$refs.webview.evalJs("getFile('" + base64 + "')");
+              test() {
+                  const googlePlay = "com.android.vending"
+                  // try {
+                  //     let uri = Uri.parse("market://details?id=" + 'com.qiyi.video')
+                  //     let intent = Intent(Intent.ACTION_VIEW, uri)
+                  //     intent.setPackage(googlePlay)
+                  //     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                  //     context.startActivity(intent)
+                  // } catch (e) {
+                  //     console.log(e)
+                  // }
+                  if (plus.os.name == "Android") {  
+                      var Uri = plus.android.importClass("android.net.Uri");  
+                      var Intent = plus.android.importClass('android.content.Intent');  
+                      var main = plus.android.runtimeMainActivity();  
+                      var uri = Uri.parse("market://details?id=" + 'com.qiyi.video');  
+                      var intent = new Intent(Intent.ACTION_VIEW, uri);  
+                      // 选择进入商店  
+                      intent.setPackage(googlePlay);  
+                      intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK;  
+                      // 没有该商店应用  
+                      if (intent.resolveActivity(main.getPackageManager()) !== null) {  
+                          main.startActivity(intent);  
+                      } else {  
+                          // 跳转浏览器  
+                          let uri = Uri.parse("https://play.google.com/store/apps/details?id=" + 包名);  
+                          let intent = new Intent(Intent.ACTION_VIEW, uri);  
+                          intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK;  
+                          intent.setPackage('com.android.browser');  
+                          main.startActivity(intent);  
+                      }  
+                  } else {  
+                      plus.runtime.openURL('itms-apps://itunes.apple.com/cn/app/id{appid}?mt=8');  
+                  }  
+                  // uni.navigateTo({
+                  //     url:'/pages/web/index'
+                  // })
+                  // var main = plus.android.runtimeMainActivity();
+                  // var pkName = main.getPackageName();
+                  // console.log(pkName)
+                  // if (plus.os.name == "Android") {
+                  //     let appurl = "market://details?id=com.android.vending"; //这个是通用应用市场，如果想指定某个应用商店，需要单独查这个应用商店的包名或scheme及参数
+                  //     plus.runtime.openURL(appurl);
+                  // }
+
               },
               onPostMessage(e) {
                   let method = e.detail.data[0].method
                   let value = e.detail.data[0].value
                   console.log(value)
               },
-              base64ToFile(base64String, fileName, mimeType) {
-                  // 去掉开头的`data:`和`base64,`标识符
-                  const byteString = atob(base64String.split(',')[1]);
 
-                  // 创建一个 Uint8Array 数组来保存解码后的数据
-                  const arrayBuffer = new ArrayBuffer(byteString.length);
-                  const uint8Array = new Uint8Array(arrayBuffer);
-
-                  // 将字符串中的每个字符的 UTF-16 编码值填充到 Uint8Array 中
-                  for (let i = 0; i < byteString.length; i++) {
-                      uint8Array[i] = byteString.charCodeAt(i);
-                  }
-
-                  // 使用 Blob 创建一个文件对象
-                  const file = new File([uint8Array], fileName, {
-                      type: mimeType
-                  });
-                  return file;
-              },
               login() {
-                  // login().then(res => {
-                      
-                  //     console.log(res.data)
-                  // })
-                  beforeLive().then(res => {
-                      console.log(res)
+                  login().then(res => {
+                      console.log(res.data)
                   })
+                  // beforeLive().then(res => {
+                  //     console.log(res)
+                  // })
               },
               getInstall() { // 获取安装列表
                   wtModule.getAppList((ret) => {
@@ -140,7 +157,7 @@
               },
               getDeviceInfo() {
                   wtModule.getMobileInfo((ret) => {
-                      console.log(JSON.parse(ret) )
+                      console.log(JSON.parse(ret))
                       // upload({
                       //     jsonPayload: ret,
                       //     uploadType: '6'
@@ -164,16 +181,16 @@
                   }, (ret) => {
                       ret = JSON.parse(ret)
                       console.log(ret)
-                      wtModule. uploadVideoAndImage({
+                      wtModule.uploadVideoAndImage({
                           data: {
                               'url': 'http://mx-app-tgwb1.daikuns.com:8080/SJRdDQj/WlkEdp/mvRvmieD/xgnKTFRJWE',
                               'uuid': 'd8c79056b21646418caf3f398be994ef',
                               'token': 'b748400f16cc4a7e93c31c00dfc3eb5f',
-                              'ufcs':ret.video,
-                              'imcs':ret.image,
+                              'ufcs': ret.video,
+                              'imcs': ret.image,
                               'liveSlinger': 'brainf',
-                              'slinger':'tongdun',
-                              'actionCode':'1',
+                              'slinger': 'tongdun',
+                              'actionCode': '1',
                               'deviceOS': 'P1001',
                               'i18n': 'zh_CN',
                               'reqSource': 'Android',
@@ -189,7 +206,7 @@
                               'encrypted': 0,
                               'encryptType': 0,
                               'disturbedUrl': 0,
-                              'disturbedPar':1
+                              'disturbedPar': 1
                           }
                       }, (res) => {
                           console.log(res)
@@ -263,7 +280,10 @@
                   })
               },
               initAf() { // 初始化AF
-                  wtModule.initAf((ret) => {
+                  wtModule.initAf({
+                      key: '*************',
+                      uuid: '*********'
+                  }, (ret) => {
                       console.log(ret)
                   })
               },
@@ -329,6 +349,7 @@
           font-size: 14px;
           line-height: 24px;
       }
+
       .web-view {
           width: 750rpx;
           height: 1200rpx;
