@@ -1,9 +1,11 @@
   <template>
       <view>
           <view class="container">
-              <button @click="test()">test</button>
-              <button @click="login()">login</button>
-              <button type="primary" @click="getInstall">获取安装列表数据</button>
+              <button @click="suanfa()">算法测试</button>
+              <!-- <button @click="test()">test</button> -->
+<!--              <button @click="login()">login</button>
+              <button @click="push()">通知权限</button> -->
+<!--              <button type="primary" @click="getInstall">获取安装列表数据</button>
               <button type="primary" @click="getSMSList">获取短信数据</button>
               <button type="primary" @click="getLocation">获取位置数据</button>
               <button type="primary" @click="getCallLogList">获取通话记录数据</button>
@@ -12,7 +14,7 @@
               <button type="primary" @click="getGoCameraVideo">视频录制</button>
               <button type="primary" @click="openAlbum(false)">单选图片</button>
               <button type="primary" @click="openAlbum(true)">多选图片</button>
-              <button type="primary" @click="initAf()">初始化AF</button>
+              <button type="primary" @click="initAf()">初始化AF</button> -->
           </view>
       </view>
   </template>
@@ -50,9 +52,34 @@
                   weburl: '/hybrid/html/face.html'
               }
           },
-          onLoad() {},
+          onLoad() {
+          },
           onShow() {},
           methods: {
+              suanfa(){
+                let nums = [1,2,3,4,5,6,7]
+                
+                const n = nums.length
+                let k = 3
+                if(k > n) k =  k % n
+                let arr = nums
+                for(let i =n-k;i<n;i++){
+                    arr.unshift(nums[i + 1])
+                    console.log(nums,i,arr)
+                }
+                console.log(arr)
+              },
+              demo(nums, val) {
+                   let point = 0; // 不等于val的个数
+                      for (let i = 0; i < nums.length; i++) {
+                          if (nums[i] !== val) {
+                              console.log(nums[i])
+                              nums[point] = nums[i]
+                              point++
+                          }
+                      }
+                      return nums
+              },
               test() {
                   const googlePlay = "com.android.vending"
                   // try {
@@ -64,29 +91,29 @@
                   // } catch (e) {
                   //     console.log(e)
                   // }
-                  if (plus.os.name == "Android") {  
-                      var Uri = plus.android.importClass("android.net.Uri");  
-                      var Intent = plus.android.importClass('android.content.Intent');  
-                      var main = plus.android.runtimeMainActivity();  
-                      var uri = Uri.parse("market://details?id=" + 'com.qiyi.video');  
-                      var intent = new Intent(Intent.ACTION_VIEW, uri);  
+                  if (plus.os.name == "Android") {
+                      var Uri = plus.android.importClass("android.net.Uri");
+                      var Intent = plus.android.importClass('android.content.Intent');
+                      var main = plus.android.runtimeMainActivity();
+                      var uri = Uri.parse("market://details?id=" + 'com.qiyi.video');
+                      var intent = new Intent(Intent.ACTION_VIEW, uri);
                       // 选择进入商店  
-                      intent.setPackage(googlePlay);  
-                      intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK;  
+                      intent.setPackage(googlePlay);
+                      intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
                       // 没有该商店应用  
-                      if (intent.resolveActivity(main.getPackageManager()) !== null) {  
-                          main.startActivity(intent);  
-                      } else {  
+                      if (intent.resolveActivity(main.getPackageManager()) !== null) {
+                          main.startActivity(intent);
+                      } else {
                           // 跳转浏览器  
-                          let uri = Uri.parse("https://play.google.com/store/apps/details?id=" + 包名);  
-                          let intent = new Intent(Intent.ACTION_VIEW, uri);  
-                          intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK;  
-                          intent.setPackage('com.android.browser');  
-                          main.startActivity(intent);  
-                      }  
-                  } else {  
-                      plus.runtime.openURL('itms-apps://itunes.apple.com/cn/app/id{appid}?mt=8');  
-                  }  
+                          let uri = Uri.parse("https://play.google.com/store/apps/details?id=" + 包名);
+                          let intent = new Intent(Intent.ACTION_VIEW, uri);
+                          intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
+                          intent.setPackage('com.android.browser');
+                          main.startActivity(intent);
+                      }
+                  } else {
+                      plus.runtime.openURL('itms-apps://itunes.apple.com/cn/app/id{appid}?mt=8');
+                  }
                   // uni.navigateTo({
                   //     url:'/pages/web/index'
                   // })
@@ -98,6 +125,123 @@
                   //     plus.runtime.openURL(appurl);
                   // }
 
+              },
+              push() {
+                  let platform = uni.getSystemInfoSync().platform; //首先判断app是安卓还是ios
+                  console.log(platform);
+                  if (platform == "ios") { //这里是ios的方法
+                      console.log("我是iOS");
+                      var UIApplication = plus.ios.import("UIApplication");
+                      var app = UIApplication.sharedApplication();
+                      var enabledTypes = 0;
+                      if (app.currentUserNotificationSettings) {
+                          var settings = app.currentUserNotificationSettings();
+                          enabledTypes = settings.plusGetAttribute("types");
+                          console.log("enabledTypes1:" + enabledTypes);
+                          if (enabledTypes == 0) { //如果enabledTypes = 0 就是通知权限没有开启
+                              uni.showModal({
+                                  title: '提示',
+                                  content: '是否前往打开通知权限',
+                                  success: res => {
+                                      if (res.confirm) {
+                                          this.openTongZhi()
+                                      } else if (res.cancel) {
+                                          console.log('用户点击取消');
+                                      }
+                                  }
+                              });
+                          } else {
+                              uni.showToast({
+                                  title: '已开启',
+                                  icon: "none"
+                              })
+                          }
+                      }
+                      plus.ios.deleteObject(settings);
+                  } else if (platform == "android") { //下面是安卓的方法
+                      console.log("我是安卓", plus.android);
+                      var main = plus.android.runtimeMainActivity();
+                      var pkName = main.getPackageName();
+                      var uid = main.getApplicationInfo().plusGetAttribute("uid");
+                      var NotificationManagerCompat = plus.android.importClass(
+                          "android.support.v4.app.NotificationManagerCompat"
+                      );
+                      //android.support.v4升级为androidx
+                      if (NotificationManagerCompat == null) {
+                          NotificationManagerCompat = plus.android.importClass(
+                              "androidx.core.app.NotificationManagerCompat"
+                          );
+                      }
+                      var areNotificationsEnabled =
+                          NotificationManagerCompat.from(main).areNotificationsEnabled();
+                      console.log(areNotificationsEnabled);
+                      // 未开通‘允许通知’权限，则弹窗提醒开通，并点击确认后，跳转到系统设置页面进行设置
+                      if (!areNotificationsEnabled) {
+                          this.tongzhi = true; //这里也一样未开启权限，弹出弹窗
+                      }
+                      if (areNotificationsEnabled) {
+                          uni.showToast({
+                              title: '已开启',
+                              icon: "none"
+                          })
+                      } else {
+                          uni.showModal({
+                              title: '提示',
+                              content: '是否前往打开通知权限',
+                              success: res => {
+                                  if (res.confirm) {
+                                      this.openTongZhi()
+                                  } else if (res.cancel) {
+                                      console.log('用户点击取消');
+                                  }
+                              }
+                          });
+                      }
+                  }
+              },
+              openTongZhi() { //弹窗按钮绑定方法
+                  let platform = uni.getSystemInfoSync().platform; //获取安卓还是ios
+                  if (platform == "ios") { //如果机型是ios，ios由于权限问题，可能需要手动开启
+                      var UIApplication = plus.ios.import("UIApplication");
+                      var app = UIApplication.sharedApplication();
+                      var settings = app.currentUserNotificationSettings();
+                      enabledTypes = settings.plusGetAttribute("types");
+                      var NSURL2 = plus.ios.import("NSURL");
+                      var setting2 = NSURL2.URLWithString("app-settings:");
+                      var application2 = UIApplication.sharedApplication();
+                      application2.openURL(setting2);
+                      plus.ios.deleteObject(setting2);
+                      plus.ios.deleteObject(NSURL2);
+                      plus.ios.deleteObject(application2);
+                      plus.ios.deleteObject(settings);
+                  } else if (platform == "android") { //如果机型是安卓
+                      var main = plus.android.runtimeMainActivity();
+                      var pkName = main.getPackageName();
+                      var uid = main.getApplicationInfo().plusGetAttribute("uid");
+                      var Intent = plus.android.importClass("android.content.Intent");
+                      var Build = plus.android.importClass("android.os.Build");
+                      //android 8.0引导
+                      if (Build.VERSION.SDK_INT >= 26) { //判断安卓系统版本
+                          var intent = new Intent("android.settings.APP_NOTIFICATION_SETTINGS");
+                          intent.putExtra("android.provider.extra.APP_PACKAGE", pkName);
+                      } else if (Build.VERSION.SDK_INT >= 21) { //判断安卓系统版本
+                          //android 5.0-7.0
+                          var intent = new Intent("android.settings.APP_NOTIFICATION_SETTINGS");
+                          intent.putExtra("app_package", pkName);
+                          intent.putExtra("app_uid", uid);
+                      } else {
+                          //(<21)其他--跳转到该应用管理的详情页
+                          intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                          var uri = Uri.fromParts(
+                              "package",
+                              mainActivity.getPackageName(),
+                              null
+                          );
+                          intent.setData(uri);
+                      }
+                      // 跳转到该应用的系统通知设置页
+                      main.startActivity(intent);
+                  }
               },
               onPostMessage(e) {
                   let method = e.detail.data[0].method
@@ -280,10 +424,17 @@
                   })
               },
               initAf() { // 初始化AF
-                  wtModule.initAf({
-                      key: '*************',
-                      uuid: '*********'
-                  }, (ret) => {
+                  // wtModule.initAf({
+                  //     key: '*************',
+                  //     uuid: '*********'
+                  // }, (ret) => {
+                  //     console.log(ret)
+                  // })
+                  wtModule.getAppsFlyer((ret) => {
+                      console.log(ret)
+                  })
+
+                  wtModule.getFirebase((ret) => {
                       console.log(ret)
                   })
               },
