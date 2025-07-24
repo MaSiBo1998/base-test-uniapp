@@ -18,7 +18,7 @@
             }
         },
         onLoad(options) {
-            this.url = 'https://bjdc-webview.xmtest.net/#/?test=sendnative'
+            // this.url = 'https://bjdc-webview.xmtest.net/#/?test=sendnative'
             // #ifdef APP-PLUS
             // plus.navigator.setFullscreen(false) //是否需要状态栏
             // plus.camera.getCamera(); //二次获取摄像头，h5需要
